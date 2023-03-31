@@ -22,3 +22,26 @@
   when:
   - ansible_os_family == "Debian"
 
+
+- name: centos repository
+  block:
+
+  - name: fetch repository key
+    ansible.builtin.shell: "rpm --import https://ltb-project.org/documentation/_static/RPM-GPG-KEY-LTB-project"
+
+  - name: setup epel repository
+    ansible.builtin.shell: |
+      dnf config-manager --set-enabled powertools
+      dnf install -y epel-release epel-next-release
+
+  - name: "setup ldaptoolbox repository on redhat / centos / rocky "
+    copy:
+      content: |
+        [ltb-project]
+        name=LTB project packages
+        baseurl=https://ltb-project.org/rpm/$releasever/noarch
+        enabled=1
+        gpgcheck=1
+        gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LTB-project
+      dest: /etc/yum.repos.d/ltb-project.repo
+  when: ( ((ansible_distribution == "CentOS")  or (ansible_distribution == "Rocky") or (ansible_distribution == 'RedHat' )) and ( ( ansible_distribution_major_version == "8" ) or ( ansible_distribution_major_version == "9" ) ) )

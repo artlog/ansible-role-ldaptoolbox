@@ -11,8 +11,15 @@ ldaptoolbox_apt_repo: "deb [arch=amd64] https://ltb-project.org/debian/jessie je
 ldaptoolbox_apt_repo_filename: "ltb-project"
 ldaptoolbox_validate_certs: "false"
 
+# RPM YUM DNF Configuration
+# TODO yet hardcoded in ldaptoolbox-repository
+ldaptoolbox_rpm_repo_baseurl: "https://ltb-project.org/rpm/$releasever/noarch"
+
+
 # OpenLdap
 # --------
+
+# openldap is delivered by another role ansible-openldap-toolbox-openldap
 
 ldaptoolbox_openldap_package_name: openldap-ltb
 ldaptoolbox_openldap_package_state: present
@@ -36,8 +43,8 @@ ldaptoolbox_openldap_sasl_package_name: sasl2-bin
 
 # Webapps dependencies
 ldaptoolbox_webserver_dependencies:
-  - apache2
-  - libapache2-mod-php
+  - httpd
+#  - libhttpd-mod-php
   - php-fpm
   - php-ldap
   - php-mbstring
@@ -46,19 +53,35 @@ ldaptoolbox_webserver_dependencies:
 ldaptoolbox_webserver_modules:
   - ssl
 
-# Webapps installation
-ldaptoolbox_install_directory: "/usr/share"
-ldaptoolbox_webserver_name: "apache2"
-ldaptoolbox_webserver_directory: "/etc/apache2/"
-ldaptoolbox_webserver_user: "www-data"
-ldaptoolbox_webserver_group: "www-data"
-ldaptoolbox_proxy_fcgi_enabled: false
+# Webapps installation under debian
+# ldaptoolbox_install_directory: "/usr/share"
+# ldaptoolbox_webserver_name: "apache2"
+# ldaptoolbox_webserver_directory: "/etc/apache2/"
+# ldaptoolbox_webserver_user: "www-data"
+# ldaptoolbox_webserver_group: "www-data"
+# ldaptoolbox_proxy_fcgi_enabled: false
+# ldaptoolbox_webserver_vhost_directory: 'sites-available'
 
 # To access the private key
-ldaptoolbox_ssl_group: "ssl-cert"
+# ldaptoolbox_ssl_group: "ssl-cert"
+
+# Webapps installation under centos rocky redhat
+ldaptoolbox_install_directory: "/usr/share"
+ldaptoolbox_webserver_name: "httpd"
+ldaptoolbox_webserver_directory: "/etc/httpd/"
+ldaptoolbox_webserver_user: "apache"
+ldaptoolbox_webserver_group: "apache"
+ldaptoolbox_proxy_fcgi_enabled: false
+#ldaptoolbox_webserver_vhost_directory: 'vhosts.d'
+ldaptoolbox_webserver_vhost_directory: 'conf.d'
+
+# To access the private key under centos rocky redhat
+ldaptoolbox_ssl_group: "root"
 
 # Localization
 ldaptoolbox_lang: "en"
+
+# missing images directory ...
 ldaptoolbox_logo: "images/ltb-logo.png"
 ldaptoolbox_background: "images/unsplash-space.jpeg"
 
@@ -80,15 +103,19 @@ ldaptoolbox_ssp_deployment:
   group: ssp
   # virtual server configuration
   server_port: 80
-  server_name: "{{ ansible_fqdn }}"
-  server_root: "{{ ldaptoolbox_install_directory }}/self-service-password"
+  server_name: "{{ ldaptoolbox_ssp_server_name }}"
+  server_root: "{{ ldaptoolbox_install_directory }}/self-service-password/htdocs"
   server_loglevel: "debug"
   ssl_server_port: 443
-  ssl_key: /etc/ssl/private/{{ ansible_fqdn }}.key
-  ssl_cert: /etc/ssl/certs/{{ ansible_fqdn }}.crt
+#  ssl_key: /etc/ssl/private/{{ ansible_fqdn }}.key
+#  ssl_cert: /etc/ssl/certs/{{ ansible_fqdn }}.crt
+  ssl_key: "{{ ldaptoolbox_ssp_ssl_key }}"
+  ssl_cert: "{{ ldaptoolbox_ssp_ssl_cert }}"
+
 
 # Please refer to upstream documentation to learn more about the settings:
 # https://self-service-password.readthedocs.io/en/latest/
+# https://self-service-password.readthedocs.io/en/latest/installation.html#centos-redhat
 
 # Environment
 ldaptoolbox_ssp_ldap_settings:
@@ -102,7 +129,7 @@ ldaptoolbox_ssp_ldap_settings:
   ldap_filter: "'(&(objectClass=person)($ldap_login_attribute={login}))'"
 ldaptoolbox_ssp_local_password_policy_settings: {}
 ldaptoolbox_ssp_mail_settings: {}
-ldaptoolbox_ssp_customization_settings: 
+ldaptoolbox_ssp_customization_settings:
   show_menu: true
   lang: "{{ ldaptoolbox_lang }}"
   logo: "{{ ldaptoolbox_logo }}"

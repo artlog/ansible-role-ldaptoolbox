@@ -5,10 +5,16 @@ This role aims to deploy tools from the Ldap Toolbox (see ltb-project.org).
 
 For now it is able to deploy Self-Service Password with Apache2 on Debian.
 
+Work in progress :
+to deploy Self-Service Password and Service-Desk with Apache2 on Redhat.
+
 
 Requirements
 ------------
 
+VM installed with right operating system
+internet access for repositories
+accessible through ansible host if not same as VM.
 
 Role Variables
 --------------
@@ -39,6 +45,11 @@ ldaptoolbox_ssp_ldap_settings:
 
 For more Self-Service Password Settings, please refer to [upstream documentation](https://self-service-password.readthedocs.io/en/latest/).
 
+#### Logo
+
+logo should be in files/images/ltb-logo.png
+
+default logo can be foudn in project self-service-password.worteks/docs/images/ltb-logo.png
 
 Dependencies
 ------------
@@ -76,3 +87,4 @@ Author Information
 ------------------
 
 Mathieu Jourdan <m.jourdan@rennesmetropole.fr>
+Philippe Lhary <philippe.lhardy@worteks.com>

@@ -45,11 +45,19 @@
       group: "{{ ldaptoolbox_webserver_group }}"
       mode: 0640
 
+  - name: image directory
+    file:
+      path: "{{ item.install_dir }}/images"
+      owner: "{{ ldaptoolbox_webserver_group }}"
+      group: "{{ ldaptoolbox_webserver_group }}"
+      mode: 0640
+      state: directory
+
   - name: copy logo
     copy:
       src: "files/{{ ldaptoolbox_logo }}"
       dest: "{{ item.install_dir }}/{{ ldaptoolbox_logo }}"
-      owner: "{{ item.owner }}"
+      owner: "{{ ldaptoolbox_webserver_group }}"
       group: "{{ ldaptoolbox_webserver_group }}"
       mode: 0644
     when: ldaptoolbox_logo is defined
@@ -65,32 +73,45 @@
     tags:
       - apache
 
+  - name: install required webserver modules
+    command: "dnf install -y mod_{{ item }}"
+    loop: "{{ ldaptoolbox_webserver_modules }}"
+    notify: reload {{ ldaptoolbox_webserver_name }}
+    when:
+      - ldaptoolbox_webserver_modules | length > 0
+      - ansible_os_family != "Debian"
+    tags:
+      - apache
+
   - name: enable required webserver modules
     command: "a2enmod {{ item }}"
     loop: "{{ ldaptoolbox_webserver_modules }}"
     notify: reload apache2
     when:
       - ldaptoolbox_webserver_modules | length > 0
+      - ansible_os_family == "Debian"
     tags:
       - apache
-  
+
   - name: configure vhost
     template:
       src: "etc/apache2/sites-available/{{ item.name }}.conf"
-      dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+      dest: "{{ ldaptoolbox_webserver_directory }}/{{ ldaptoolbox_webserver_vhost_directory }}/{{ item.name }}.conf"
       owner: "root"
       group: "root"
       mode: 0640
     notify:
       - configtest apache2
-      - reload apache2
+      - reload {{ ldaptoolbox_webserver_name }}
     tags:
       - apache
 
   - name: enable vhost
     command: "a2ensite {{ item.name }}"
-    notify: reload apache2
+    notify: reload {{ ldaptoolbox_webserver_name }}
     tags:
       - apache
+    when:
+      - ansible_os_family == "Debian"
 
 
