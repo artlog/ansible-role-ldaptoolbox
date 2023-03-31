@@ -21,9 +21,9 @@
 
   - name: deploy Service Desk
     include_tasks: ldaptoolbox-webapp.yml
-    loop: "{{ ldaptoolbox_servicedesk_deployment }}"
+    loop: "{{ ldaptoolbox_sd_deployment }}"
     when:
-      - ldaptoolbox_servicedesk_enabled is true
+      - ldaptoolbox_sd_enabled is true
     tags:
     - servicedesk
     - deploy

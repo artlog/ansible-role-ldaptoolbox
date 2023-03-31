@@ -43,6 +43,23 @@ ldaptoolbox_ssp_ldap_settings:
 
 For more Self-Service Password Settings, please refer to [upstream documentation](https://self-service-password.readthedocs.io/en/latest/).
 
+### Service-Desk
+
+By default service desk access is protected by basic auth only members in {{ ldaptoolbox_sd_admin_group }} ,{{ ldaptoolbox_sd_organisation_ldap_base }} are allowed to use it.
+
+```
+ldaptoolbox_sd_ldap_settings:
+	ldap_url: "'ldap://localhost'"
+	ldap_starttls: false
+	ldap_binddn: "'cn=manager,dc=example,dc=com'"
+	ldap_bindpw: "'secret'"
+	ldap_base: "'dc=example,dc=com'"
+	ldap_login_attribute: "'uid'"
+	ldap_fullname_attribute: "'cn'"
+	ldap_filter: "'(&(objectClass=person)($ldap_login_attribute={login}))'"
+ldaptoolbox_sd_admin_group: "cn=support"
+```
+
 #### Logo
 
 logo should be in files/images/ltb-logo.png
@@ -86,7 +103,6 @@ Example for deploying Self-Service Password:
       ldaptoolbox_ssp_mail_settings: {}
       ldaptoolbox_ssp_ssl_key: "{{ ldaptoolbox_openldap_olcTLSCertificateKeyFile }}"
       ldaptoolbox_ssp_ssl_cert: "{{ ldaptoolbox_openldap_olcTLSCertificateFile }}"
-      ldaptoolbox_ssp_apache_log_dir: /var/log/httpd/
 ```
 
 and vars/ 

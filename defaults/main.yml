@@ -12,8 +12,10 @@ ldaptoolbox_apt_repo_filename: "ltb-project"
 ldaptoolbox_validate_certs: "false"
 
 # RPM YUM DNF Configuration
-# TODO yet hardcoded in ldaptoolbox-repository
-ldaptoolbox_rpm_repo_baseurl: "https://ltb-project.org/rpm/$releasever/noarch"
+# TODO yet many variables hardcoded in ldaptoolbox-repository
+# ldaptoolbox_rpm_repo_baseurl: "https://ltb-project.org/rpm/$releasever/noarch"
+# FIXME service-desk in only in https://ltb-project.org/rpm/8/noarch/ not in https://ltb-project.org/rpm/9/noarch/
+ldaptoolbox_rpm_repo_baseurl: "https://ltb-project.org/rpm/8/noarch"
 
 
 # OpenLdap
@@ -52,6 +54,7 @@ ldaptoolbox_webserver_dependencies:
 # Webserver modules
 ldaptoolbox_webserver_modules:
   - ssl
+  - ldap
 
 # Webapps installation under debian
 # ldaptoolbox_install_directory: "/usr/share"
@@ -61,6 +64,8 @@ ldaptoolbox_webserver_modules:
 # ldaptoolbox_webserver_group: "www-data"
 # ldaptoolbox_proxy_fcgi_enabled: false
 # ldaptoolbox_webserver_vhost_directory: 'sites-available'
+
+# ldaptoolbox_webserver_log_dir=/var/log/apache2
 
 # To access the private key
 # ldaptoolbox_ssl_group: "ssl-cert"
@@ -74,6 +79,8 @@ ldaptoolbox_webserver_group: "apache"
 ldaptoolbox_proxy_fcgi_enabled: false
 #ldaptoolbox_webserver_vhost_directory: 'vhosts.d'
 ldaptoolbox_webserver_vhost_directory: 'conf.d'
+
+ldaptoolbox_webserver_log_dir: '/var/log/httpd'
 
 # To access the private key under centos rocky redhat
 ldaptoolbox_ssl_group: "root"
@@ -150,8 +157,45 @@ ldaptoolbox_ssp_overrides:
 # ------------
 
 # installation
-ldaptoolbox_servicedesk_enabled: false
-ldaptoolbox_servicedesk_deployment: []
+ldaptoolbox_sd_enabled: false
+
+ldaptoolbox_sd_deployment:
+- name: service-desk
+  # package installation
+  package_name: service-desk
+  package_state: present
+  install_dir: "{{ ldaptoolbox_install_directory }}/service-desk"
+  config_dir: "{{ ldaptoolbox_install_directory }}/service-desk/conf"
+  owner: sd
+  group: sd
+  # virtual server configuration
+  server_port: 80
+  server_name: "{{ ldaptoolbox_sd_server_name }}"
+  server_root: "{{ ldaptoolbox_install_directory }}/service-desk/htdocs"
+  server_loglevel: "debug"
+  ssl_server_port: 443
+#  ssl_key: /etc/ssl/private/{{ ansible_fqdn }}.key
+#  ssl_cert: /etc/ssl/certs/{{ ansible_fqdn }}.crt
+  ssl_key: "{{ ldaptoolbox_sd_ssl_key }}"
+  ssl_cert: "{{ ldaptoolbox_sd_ssl_cert }}"
+
+ldaptoolbox_sd_ldap_settings:
+  ldap_url: "'ldap://localhost'"
+  ldap_starttls: false
+  ldap_binddn: "cn=sd,ou=dsa,dc=example,dc=com"
+  ldap_bindpw: "'secret'"
+  ldap_base: "'dc=example,dc=com'"
+  ldap_user_base: "ou=users,dc=example,dc=com"
+  ldap_user_filter: "(&(objectClass=inetOrgPerson))"
+  ldap_default_ppolicy: "cn=default,ou=ppolicies,dc=example,dc=com"
+  
+ldaptoolbox_sd_customization_settings:
+  show_menu: true
+  lang: "{{ ldaptoolbox_lang }}"
+  logo: "{{ ldaptoolbox_logo }}"
+  background_image: "{{ ldaptoolbox_background }}"
+  custom_css: ""
+  display_footer: false
 
 
 # White Pages

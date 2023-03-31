@@ -39,7 +39,7 @@
       content: |
         [ltb-project]
         name=LTB project packages
-        baseurl=https://ltb-project.org/rpm/$releasever/noarch
+        baseurl={{ ldaptoolbox_rpm_repo_baseurl }}
         enabled=1
         gpgcheck=1
         gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LTB-project
